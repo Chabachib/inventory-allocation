@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+
+app/main.py
+app/main_2.py
+app/utils/allocation.py
+app/utils/allocation_2.py
+version.md
+
+data
+misc
