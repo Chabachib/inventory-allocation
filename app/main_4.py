@@ -1,6 +1,3 @@
-# app.py
-# app_v4.1.py
-
 import streamlit as st
 import pandas as pd
 from utils.allocation_4 import InventoryAllocationSystem 
@@ -9,10 +6,16 @@ from utils.allocation_4 import InventoryAllocationSystem
 st.set_page_config(layout="wide", page_title="Advanced Inventory Allocation")
 
 # --- App Title ---
-st.title("📦 Advanced Inventory Allocation Tool (v4)")
+st.title("📦 Advanced Inventory Allocation Tool")
 st.markdown("A flexible tool to map, analyze, and allocate inventory with custom rules.")
 
 # --- Session State Initialization ---
+
+if "forecast_key" not in st.session_state:
+    st.session_state.forecast_key = "forecast_file_1"
+if "stock_key" not in st.session_state:
+    st.session_state.stock_key = "stock_file_1"
+
 if 'system' not in st.session_state:
     st.session_state.system = None
     st.session_state.analysis_run = False
@@ -32,9 +35,10 @@ with tab1:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        forecast_file = st.file_uploader("Upload Forecast CSV", type="csv")
+        forecast_file = st.file_uploader("Upload Forecast CSV", type="csv", key=st.session_state.forecast_key)
     with col2:
-        stock_file = st.file_uploader("Upload Stock CSV", type="csv")
+        stock_file = st.file_uploader("Upload Stock CSV", type="csv", key=st.session_state.stock_key)
+
     with col3:
         # --- Central Warehouse ID input ---
         cw_branch_id = st.number_input("Enter Central Warehouse Branch ID", value=1000, step=1)
@@ -115,7 +119,7 @@ with tab2:
         def style_status_column(val):
             color = {'Overstock': '#ffcdd2', 'Allocation Needed': '#ffecb3', 'No Allocation Needed': '#c8e6c9'}.get(val, 'white')
             return f'background-color: {color}; color: black;'
-        styled_df = system.analysis_df.style.applymap(style_status_column, subset=['allocation_status'])
+        styled_df = system.analysis_df.style.map(style_status_column, subset=["allocation_status"])
         st.dataframe(styled_df, height=500, use_container_width=True)
 
 # =================================================================================================
@@ -204,3 +208,17 @@ with tab3:
                 st.dataframe(df_remaining)
                 if not df_remaining.empty:
                     st.download_button("Download Remaining Stock as CSV", df_remaining.to_csv(index=False).encode('utf-8'), "remaining_warehouse_stock.csv", "text/csv")
+                    
+# --- Clear Cache / Reset App ---
+with st.sidebar:
+    st.markdown("## ⚙️ Controls")
+    if st.button("🔄 Reset App"):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.session_state.clear()
+
+        # Generate new keys to "reset" the file uploaders
+        st.session_state.forecast_key = f"forecast_file_{pd.Timestamp.now().timestamp()}"
+        st.session_state.stock_key = f"stock_file_{pd.Timestamp.now().timestamp()}"
+
+        st.rerun()

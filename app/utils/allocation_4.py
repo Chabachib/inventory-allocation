@@ -186,7 +186,7 @@ class InventoryAllocationSystem:
         ax1.set_title('Overall Inventory Status (by Branch)', fontsize=16)
         channel_demand = self.analysis_df[self.analysis_df['allocation_status'] == 'Allocation Needed'].groupby('channel_id')['forecast_quantity'].sum().nlargest(10)
         fig2, ax2 = plt.subplots(figsize=(10,6))
-        sns.barplot(x=channel_demand.index, y=channel_demand.values, palette='magma', order=channel_demand.index, ax=ax2)
+        sns.barplot(x=channel_demand.index, y=channel_demand.values, hue=channel_demand.index, palette='magma', order=channel_demand.index, ax=ax2, legend=False)
         ax2.set_title('Top 10 Channels by Forecast Demand', fontsize=16)
         return fig1, fig2
 
@@ -202,6 +202,6 @@ class InventoryAllocationSystem:
         alloc_by_channel = self.allocation_plan_df.groupby('channel_id')['quantity_allocated'].sum().nlargest(10) if not self.allocation_plan_df.empty else pd.Series()
         fig2, ax2 = plt.subplots(figsize=(12, 7))
         if not alloc_by_channel.empty:
-            sns.barplot(x=alloc_by_channel.index, y=alloc_by_channel.values, palette='crest', order=alloc_by_channel.index, ax=ax2)
+            sns.barplot(x=alloc_by_channel.index, y=alloc_by_channel.values, hue=alloc_by_channel.index, palette='crest', order=alloc_by_channel.index, ax=ax2, legend=False)
         ax2.set_title('Top 10 Channels by Quantity Allocated', fontsize=16)
         return fig1, fig2
